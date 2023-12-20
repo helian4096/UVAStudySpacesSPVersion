@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Profile</title>
+
+		{% load static %} {% load bootstrap_icons %}
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script>
+			$(document).ready(function () {
+				$('[data-toggle="tooltip"]').tooltip()
+			})
+		</script>
+	</head>
+	<body class="background">
+		{% include 'study_spaces/navbar.html' %}
+		<div class="container-fluid col-md-8 col-lg-6 mx-auto">
+			<h1 class="mt-3">{{ study_space.name }}</h1>
+			<span class="d-flex">
+				<strong>Address:</strong>
+				<p class="mx-2">{{ study_space.address }}</p>
+			</span>
+			<span class="d-flex flex-column">
+				<strong>Amenities:</strong>
+				<span>
+					{% if study_space.has_wifi %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="WiFi">
+						{% bs_icon 'wifi' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %} {% if study_space.has_outlets %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Outlets">
+						{% bs_icon 'outlet' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %} {% if study_space.has_printers %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Printers">
+						{% bs_icon 'printer' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %} {% if study_space.has_whiteboards %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Whiteboards">
+						{% bs_icon 'easel' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %} {% if study_space.is_quiet %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Quiet">
+						{% bs_icon 'bell-slash' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %} {% if study_space.is_outside %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Outside">
+						{% bs_icon 'sun' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %} {% if study_space.has_food %}
+					<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Food Nearby">
+						{% bs_icon 'cup' size='1.75em' extra_classes='feature-icon' %}
+					</span>
+					{% endif %}
+				</span>
+			</span>
+			<p class="mt-4"><strong>Location: </strong>{{ study_space.location|linebreaks }}</p>
+			<p class="mt-4"><strong>Environment: </strong>{{ study_space.environment|linebreaks }}</p>
+			<p class="mt-4"><strong>Traffic: </strong>{{ study_space.traffic|linebreaks }}</p>
+			<p class="mt-4"><strong>Hours: </strong>{{ study_space.hours|linebreaks }}</p>
+			<p class="mt-4">{{ study_space.other_information|linebreaks }}</p>
+		</div>
+	</body>
+</html>

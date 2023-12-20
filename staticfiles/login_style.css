@@ -1,0 +1,12 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: url("https://pbs.twimg.com/media/EtZ0pzOXYAAGO6g.jpg:large") center/cover no-repeat;
+    height: 100vh;
+    font-family: "Arial", sans-serif;
+}
+
+.login-box {
+    background-color: rgba(245, 245, 245, 0.9);
+    border-radius: 20px;
+}

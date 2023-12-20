@@ -1,0 +1,93 @@
+<!--
+REFERENCES
+
+ Title: Tooltips
+ Author: Bootstrap
+ Date: N/A
+ Code version: N/A
+ URL: https://getbootstrap.com/docs/5.0/components/tooltips/
+ Software License: MIT
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Study Spaces</title>
+
+		{% load bootstrap_icons %}
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+		<script
+			src="https://code.jquery.com/jquery-3.6.0.min.js"
+			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			crossorigin="anonymous"
+		></script>
+		<script>
+			window.map
+			window.key = "{{key}}"
+			window.modJson = JSON.parse("{{ mod_json|escapejs }}")
+		</script>
+		{% load static %}
+		<script src="{% static 'home_map.js' %}"></script>
+	</head>
+	<body class="background">
+		{% include 'study_spaces/navbar.html' %}
+		<div class="row" style="width: 100vw">
+			<div class="col-sm-8">
+				<div id="map-container">
+					<div id="map" class="h-100"></div>
+				</div>
+			</div>
+			<div class="col-sm-4">
+				<div id="list-container" class="my-4" style="overflow-y: scroll">
+					{% block content %} {% for x in mod %}
+					<div id="study-card-id-{{x.id}}" class="card mb-3" style="border-width: 2px; border-style: solid">
+						<div class="card-body">
+							<h5 class="card-title">{{x.name}}</h5>
+							<p class="card-text m-0">{{x.address}}</p>
+							<div style="margin: 0.5em 0px 0.5em 0px;">
+								<span>
+									{% if x.has_wifi %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="WiFi">
+										{% bs_icon 'wifi' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %} {% if x.has_outlets %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Outlets">
+										{% bs_icon 'outlet' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %} {% if x.has_printers %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Printers">
+										{% bs_icon 'printer' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %} {% if x.has_whiteboards %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Whiteboards">
+										{% bs_icon 'easel' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %} {% if x.is_quiet %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Quiet">
+										{% bs_icon 'bell-slash' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %} {% if x.is_outside %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Outside">
+										{% bs_icon 'sun' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %} {% if x.has_food %}
+									<span class="icon-tooltip" data-toggle="tooltip" data-placement="bottom" title="Food Nearby">
+										{% bs_icon 'cup' size='1.75em' extra_classes='feature-icon' %}
+									</span>
+									{% endif %}
+								</span>
+							</div>
+							<div class="float-end">
+								<a href="{% url 'study_spaces:information' %}?dest={{ x.id }}" class="btn outline-primary">More Information</a>
+								<a href="{% url 'study_spaces:directions' %}?dest={{ x.id }}" class="btn primary-button">Get Directions</a>
+							</div>
+						</div>
+					</div>
+					{% endfor %} {% endblock content %}
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

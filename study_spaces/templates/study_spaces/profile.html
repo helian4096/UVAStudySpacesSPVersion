@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Profile</title>
+	</head>
+	<body>
+		{% include 'study_spaces/navbar.html' %}
+		<div class="col-md-8 col-lg-6 mx-auto mt-5 d-flex align-items-center flex-column">
+			{% if user.is_authenticated %}
+			<div class="d-flex">
+				<img src="{{ googleUser.picture }}" alt="User Profile Picture" class="profile-picture-large mx-3" />
+				<div>
+					<h2>Name: {{ googleUser.name }}</h2>
+					<h5>Email: {{user.email}}</h5>
+				</div>
+			</div>
+			{% if is_admin %}
+			<br/>
+			<p>You are an admin</p>
+			{% endif %} {% endif %}
+		</div>
+	</body>
+</html>

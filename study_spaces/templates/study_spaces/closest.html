@@ -1,0 +1,114 @@
+<!--
+ REFERENCES:
+
+ Title: did_django_google_maps_api
+ Author: Bobby Stearman
+ Date: 04/16/2021
+ Code version: N/A
+ URL: https://www.youtube.com/watch?v=wCn8WND-JpU
+ Software License: GPL-3.0 license
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Closest Study Spaces</title>
+		{% load static %} {% load bootstrap5 %} {# Load Bootstrap CSS #} {% bootstrap_css %}
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	</head>
+	<body class="background">
+		{% include 'study_spaces/navbar.html' %}
+		<div class="container-fluid">
+			<form method="post" class="form-multiline">
+				Enter an address: <br />
+				{% csrf_token %} {% if error_message %}
+				<p><strong>{{ error_message }}</strong></p>
+				{% endif %}
+				<label>
+					<input required type="text" size="50" id="id-google-address" name="address" /> </label
+				><br /><br />
+				<input type="hidden" class="geo" id="id-lat" name="lat" value="" />
+				<input type="hidden" class="geo" id="id-long" name="long" value="" />
+				<input type="submit" class="btn primary-button" id="submit-button" formaction="{% url 'study_spaces:closest' %}" />
+				<br /><br />
+			</form>
+			{% block content %} {% if start_address %}
+			<h3>Closest Study Spaces to {{ start_address }}</h3>
+			{% endif %} {% for x in mod %}
+			<h5>{{ x.name }}</h5>
+			<p>{{ x.address }}</p>
+			<a href="{% url 'study_spaces:directions' %}?dest={{ x.id }}" class="btn primary-button">Get Directions</a>
+			<br />
+			<br />
+			<br />
+			{% endfor %} {% endblock content %}
+		</div>
+	</body>
+	<script>
+		window.key = "{{ key }}"
+	</script>
+	<script type="text/javascript">
+        // https://github.com/bobby-didcoding/did_django_google_maps_api
+		$.getScript("https://maps.googleapis.com/maps/api/js?key=" + window.key + "&libraries=places").done(function (script, textStatus) {
+			google.maps.event.addDomListener(window, "load", putInRequest)
+		})
+		function putInRequest(callback) {
+			populateStartAddressWithUserLocation()
+			initAutocomplete()
+		}
+		function initAutocomplete(callback) {
+			let autocomplete = new google.maps.places.Autocomplete(document.getElementById("id-google-address"), {
+				types: ["address"],
+				componentRestrictions: { country: ["usa"] },
+			})
+
+			autocomplete.addListener("place_changed", () => {
+				const place = autocomplete.getPlace()
+				onPlaceChanged(place)
+			})
+		}
+		function onPlaceChanged(place) {
+			let el_id = "id-google-address"
+			let lat_id = "id-lat"
+			let long_id = "id-long"
+			var geocoder = new google.maps.Geocoder()
+			var address = document.getElementById(el_id).value
+
+			geocoder.geocode({ address: address }, function (results, status) {
+				if (status == google.maps.GeocoderStatus.OK) {
+					var latitude = results[0].geometry.location.lat()
+					var longitude = results[0].geometry.location.lng()
+					$("#" + lat_id).val(latitude)
+					$("#" + long_id).val(longitude)
+				} else {
+					$("#" + lat_id).val("")
+					$("#" + long_id).val("")
+				}
+			})
+		}
+		async function populateStartAddressWithUserLocation() {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(function (position) {
+					const userLocation = {
+						lat: position.coords.latitude,
+						lng: position.coords.longitude,
+					}
+
+					const geocoder = new google.maps.Geocoder()
+					geocoder.geocode({ location: userLocation }, function (results, status) {
+						if (status === google.maps.GeocoderStatus.OK) {
+							if (results[0]) {
+								const userAddress = results[0].formatted_address
+								document.getElementById("id-google-address").value = userAddress
+								document.getElementById("id-lat").value = userLocation.lat
+								document.getElementById("id-long").value = userLocation.lng
+							}
+						}
+					})
+				})
+			}
+		}
+	</script>
+</html>

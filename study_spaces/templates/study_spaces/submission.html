@@ -1,0 +1,339 @@
+<!--
+ REFERENCES:
+
+ Title: did_django_google_maps_api
+ Author: Bobby Stearman
+ Date: 04/16/2021
+ Code version: N/A
+ URL: https://www.youtube.com/watch?v=wCn8WND-JpU
+ Software License: GPL-3.0 license
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Submit a Study Space</title>
+
+		{% load static %} {% load bootstrap_icons %}
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script>
+			$(document).ready(function () {
+				$(".toast").toast()
+				$(".toast").toast("show")
+
+				$("#submissionModalButton").click(function () {
+					// Check the form validity
+					if ($("#submissionForm")[0].checkValidity()) {
+						// Open the modal if the form is valid
+						$("#submissionModal").modal("show")
+					}
+				})
+			})
+		</script>
+	</head>
+
+	<body class="background">
+		{% include 'study_spaces/navbar.html' %} {% if toasts %}
+
+		<div id="toast-container" class="toast-container position-fixed end-0 m-3">
+			{% for message in toasts %}
+			<div class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+				<div class="d-flex">
+					<div class="toast-body">{{ message | safe }}</div>
+					<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+
+		<div class="container-fluid mx-0 px-0">
+			<div class="row m-auto">
+				<div id="submission-column" class="col-lg-6 mt-4 mb-3 mx-auto" style="overflow-y: scroll">
+					<h3 class="mb-3">Submit a New Study Space!</h3>
+					<form method="post" id="submissionForm" class="form-multiline submission-section p-3" novalidate>
+						{% csrf_token %} {% if error_message %}
+						<p class="alert alert-danger"><strong>{{ error_message }}</strong></p>
+						{% endif %}
+						<div class="mb-3">
+							<label for="id-name" class="form-label">Study Space Name:</label>
+							<input required type="text" class="form-control" id="id-name" name="name" placeholder="Rice Hall" />
+						</div>
+						<div class="mb-3">
+							<label for="id-google-address" class="form-label">Address:</label>
+							<input
+								required
+								type="text"
+								class="form-control"
+								size="50"
+								id="id-google-address"
+								name="address"
+								placeholder="Enter an Address..."
+							/>
+						</div>
+						<input type="hidden" class="geo" id="id-lat" name="lat" value="" />
+						<input type="hidden" class="geo" id="id-long" name="long" value="" />
+
+						<p class="mt-3 mb-0">Amenities:</p>
+
+						<div class="row">
+							<div class="col-md-5">
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'wifi' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-has-wifi" name="has_wifi" />
+											<label class="form-check-label" for="id-has-wifi">Wifi</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'outlet' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-has-outlets" name="has_outlets" />
+											<label class="form-check-label" for="id-has-outlets">Outlets</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'printer' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-has-printers" name="has_printers" />
+											<label class="form-check-label" for="id-has-printers">Printers</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'easel' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-has-whiteboards" name="has_whiteboards" />
+											<label class="form-check-label" for="id-has-whiteboards">Whiteboards</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'bell-slash' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-is-quiet" name="is_quiet" />
+											<label class="form-check-label" for="id-is-quiet">Quiet</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'sun' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-is-outside" name="is_outside" />
+											<label class="form-check-label" for="id-is-outside">Outside</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-check p-0">
+									<div class="row align-items-center">
+										<div class="col-auto">{% bs_icon 'cup' size='1.75em' extra_classes='feature-icon' %}</div>
+										<div class="col">
+											<input type="checkbox" class="form-check-input" id="id-has-food" name="has_food" />
+											<label class="form-check-label" for="id-has-food">Food Nearby</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<label for="location"><strong>Location:</strong></label>
+						<textarea id="location" name="location" class="form-control w-100 mb-3"></textarea>
+						<label for="environment"><strong>Environment:</strong></label>
+						<textarea id="environment" name="environment" class="form-control w-100 mb-3"></textarea>
+						<label for="traffic"><strong>Traffic:</strong></label>
+						<textarea id="traffic" name="traffic" class="form-control w-100 mb-3"></textarea>
+						<label for="hours"><strong>Hours:</strong></label>
+						<textarea id="hours" name="hours" class="form-control w-100 mb-3"></textarea>
+						<label for="other_information"><strong>Other Information:</strong></label>
+						<textarea id="other_information" name="other_information" class="form-control w-100 mb-3"></textarea>
+						<span class="d-flex justify-content-end">
+							<button
+								type="button"
+								class="btn primary-button"
+								id="submissionModalButton"
+								data-bs-toggle="modal"
+								data-bs-target="#submissionModal"
+							>
+								Submit
+							</button>
+						</span>
+
+						<div class="modal fade" id="submissionModal" tabindex="-1" aria-labelledby="submissionModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-centered">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="submissionModalLabel">Confirm Submission</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">Are you sure you want to submit the Study Space?</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<button
+											type="submit"
+											class="btn primary-button"
+											data-bs-dismiss="modal"
+											formaction="{% url 'study_spaces:submission' %}"
+										>
+											Submit
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div id="past-submission-column" class="col-lg-5 mt-4 mb-3 mx-auto" style="overflow-y: scroll">
+					{% if submitted_list_length != 0 %}
+					<h3 class="mb-3">Past Submissions</h3>
+					{% endif %} {% for x in submitted_list %}
+					<div class="mb-3 p-3 submission-section">
+						<span class="d-flex">
+							<strong>Study Space Name:</strong>
+							<p class="mx-2">{{ x.name }}</p>
+						</span>
+						<span class="d-flex">
+							<strong>Address:</strong>
+							<p class="mx-2">{{ x.address }}</p>
+						</span>
+						<span class="d-flex flex-column">
+							<strong>Amenities:</strong>
+							<span class="px-3">
+								{% if x.has_wifi %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has WiFi">
+									{% bs_icon 'wifi' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %} {% if x.has_outlets %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Outlets">
+									{% bs_icon 'outlet' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %} {% if x.has_printers %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Printers">
+									{% bs_icon 'printer' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %} {% if x.has_whiteboards %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Whiteboards">
+									{% bs_icon 'easel' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %} {% if x.is_quiet %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Quiet Study Space">
+									{% bs_icon 'bell-slash' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %} {% if x.is_outside %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Outdoor Study Space">
+									{% bs_icon 'sun' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %} {% if x.has_food %}
+								<span data-bs-toggle="tooltip" data-bs-placement="top" title="Food Nearby">
+									{% bs_icon 'cup' size='1.75em' extra_classes='feature-icon' %}
+								</span>
+								{% endif %}
+							</span>
+						</span>
+						<style>
+							.mb-2 p {
+								max-width: 100%;
+								overflow: auto;
+								overflow-x: wrap;
+								white-space: normal;
+							}
+						</style>
+						<div class="mb-2">
+							<strong>Location:</strong>
+							<p class="mx-2">{{ x.location }}</p>
+							<strong>Environment:</strong>
+							<p class="mx-2">{{ x.environment }}</p>
+							<strong>Traffic:</strong>
+							<p class="mx-2">{{ x.traffic }}</p>
+							<strong>Hours:</strong>
+							<p class="mx-2">{{ x.hours }}</p>
+							<strong>Other Information:</strong>
+							<p class="mx-2">{{ x.other_information }}</p>
+						</div>
+						<span class="d-flex">
+							<strong>Approval Status:</strong>
+							{% if x.approved_submission == 1 %}
+							<p class="mx-2">Approved!</p>
+							{% endif %} {% if x.approved_submission == 0 %}
+							<p class="mx-2">Pending...</p>
+							{% endif %} {% if x.approved_submission == -1 %}
+							<p class="mx-2">Denied</p>
+							{% endif %}
+						</span>
+						{% if x.approved_submission == -1 %}
+						<span class="d-flex">
+							<strong>Denial Reason:</strong>
+							<p class="mx-2">{{ x.denial_reason }}</p>
+						</span>
+						{% endif %}
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+		<script>
+			var google_api_key = "{{google_api_key|safe}}"
+		</script>
+		<script type="text/javascript">
+            // https://github.com/bobby-didcoding/did_django_google_maps_api
+			$.getScript("https://maps.googleapis.com/maps/api/js?key=" + google_api_key + "&libraries=places").done(function (script, textStatus) {
+				google.maps.event.addListener(window, "load", initAutocomplete())
+			})
+
+			const navbarHeight = document.getElementById("global-navbar").offsetHeight
+			const totalHeight = `calc(100vh - ${navbarHeight}px - 2.5em)`
+			document.getElementById("submission-column").style.maxHeight = totalHeight
+			document.getElementById("past-submission-column").style.maxHeight = totalHeight
+
+			function initAutocomplete(callback) {
+				let autocomplete = new google.maps.places.Autocomplete(document.getElementById("id-google-address"), {
+					types: ["address"],
+					componentRestrictions: {
+						country: ["usa"],
+					},
+				})
+
+				autocomplete.addListener("place_changed", () => {
+					const place = autocomplete.getPlace()
+					onPlaceChanged(place)
+				})
+			}
+
+			function onPlaceChanged(place) {
+				let el_id = "id-google-address"
+				let lat_id = "id-lat"
+				let long_id = "id-long"
+				var geocoder = new google.maps.Geocoder()
+				var address = document.getElementById(el_id).value
+
+				geocoder.geocode(
+					{
+						address: address,
+					},
+					function (results, status) {
+						if (status == google.maps.GeocoderStatus.OK) {
+							var latitude = results[0].geometry.location.lat()
+							var longitude = results[0].geometry.location.lng()
+							$("#" + lat_id).val(latitude)
+							$("#" + long_id).val(longitude)
+						} else {
+							$("#" + lat_id).val("")
+							$("#" + long_id).val("")
+						}
+					}
+				)
+			}
+		</script>
+	</body>
+</html>

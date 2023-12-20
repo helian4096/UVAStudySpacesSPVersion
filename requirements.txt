@@ -1,0 +1,9 @@
+Django
+gunicorn
+django-allauth
+python-dotenv
+whitenoise
+django-bootstrap-v5
+django-bootstrap-icons
+postgres
+googlemaps

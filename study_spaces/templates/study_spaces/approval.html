@@ -1,0 +1,218 @@
+<!--
+	REFERENCES:
+
+	 Title: How can I use multiple submit buttons in an HTML form?
+	 Author: tutorialspoint
+	 Date: updated on 10/4/2023
+	 Code version: N/A
+	 URL: https://www.tutorialspoint.com/How-can-I-use-multiple-submit-buttons-in-an-HTML-form
+	 Software License: N/A
+
+	 Title: Making Django Messages Work with Bootstrap Toast: A Guide
+	 Author: Cody Smith
+	 Date: published 05/20/2023
+	 Code version: N/A
+	 URL: https://copyprogramming.com/howto/django-messages-bootstrap-toast-how-to-make-it-work
+	 Software License: N/A
+
+	 Title: Bootstrap v5.0: Toasts
+	 Author: Bootstrap
+	 Date: accessed 12/01/2023
+	 Code version: N/A
+	 URL: https://getbootstrap.com/docs/5.0/components/toasts/
+	 Software License: MIT
+
+	 Title: Bootstrap v5.0: Modal
+	 Author: Bootstrap
+	 Date: accessed 12/01/2023
+	 Code version: N/A
+	 URL: https://getbootstrap.com/docs/5.0/components/modal/
+	 Software License: MIT
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Study Space Approval</title>
+
+		{% load static %} {% load bootstrap_icons %}
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script>
+			$(document).ready(function () {
+				$(".toast").toast()
+				$(".toast").toast("show")
+			})
+		</script>
+	</head>
+
+	<body class="background">
+		{% include 'study_spaces/navbar.html' %}
+		{% if toasts %}
+		<div id="toast-container" class="toast-container position-fixed end-0 m-3">
+			{% for message in toasts %}
+			<div class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+				<div class="d-flex">
+					<div class="toast-body">{{ message | safe }}</div>
+					<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+		<div class="container-fluid col-md-8 col-lg-6 mx-auto">
+			<h3 class="mt-5 mb-3">Approve Submissions</h3>
+			{% if pending_list_length == 0 %}
+			<p>No pending submissions</p>
+			{% endif %} {% for x in pending_list %}
+			<form method="post" class="form-multiline submission-section p-3 mb-3">
+				{% csrf_token %}
+				<span class="d-flex">
+					<strong>Study Space Name:</strong>
+					<p class="mx-2">{{ x.name }}</p>
+				</span>
+				<span class="d-flex">
+					<strong>Address:</strong>
+					<p class="mx-2">{{ x.address }}</p>
+				</span>
+				<span class="d-flex flex-column">
+					<strong>Amenities:</strong>
+					<span class="px-3">
+						{% if x.has_wifi %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has WiFi">
+							{% bs_icon 'wifi' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if x.has_outlets %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Outlets">
+							{% bs_icon 'outlet' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if x.has_printers %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Printers">
+							{% bs_icon 'printer' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if x.has_whiteboards %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Whiteboards">
+							{% bs_icon 'easel' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if x.is_quiet %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Quiet Study Space">
+							{% bs_icon 'bell-slash' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if x.is_outside %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Outdoor Study Space">
+							{% bs_icon 'sun' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if x.has_food %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Food Nearby">
+							{% bs_icon 'cup' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %}
+					</span>
+				</span>
+				<style>
+					.mb-2 p {
+						max-width: 100%;
+						overflow: auto;
+						overflow-x: wrap;
+						white-space: normal;
+					}
+				</style>
+				<div class="mb-2">
+					<strong>Location:</strong>
+					<p class="mx-2">{{ x.location }}</p>
+					<strong>Environment:</strong>
+					<p class="mx-2">{{ x.environment }}</p>
+					<strong>Traffic:</strong>
+					<p class="mx-2">{{ x.traffic }}</p>
+					<strong>Hours:</strong>
+					<p class="mx-2">{{ x.hours }}</p>
+					<strong>Other Information:</strong>
+					<p class="mx-2">{{ x.other_information }}</p>
+				</div>
+				<label for="denial-reason"><stron>Reason for Denial (if applicable):</stron></label>
+				<textarea id="denial-reason" name="Denial" class="form-control w-100"></textarea>
+				<br />
+				<input type="hidden" name="id" value="{{ x.id }}" />
+				<input type="submit" value="Approve" formaction="{% url 'study_spaces:approve' %}" class="btn btn-success" />
+				<input type="submit" value="Deny" formaction="{% url 'study_spaces:deny' %}" class="btn btn-danger" />
+				<br />
+			</form>
+			{% endfor %}
+
+			<h3 class="mt-5 mb-3">Approved Study Spaces</h3>
+			{% for y in approved_list %}
+			<div class="mb-3 p-3 submission-section">
+				<span class="d-flex">
+					<strong>Study Space Name:</strong>
+					<p class="mx-2">{{ y.name }}</p>
+				</span>
+				<span class="d-flex">
+					<strong>Address:</strong>
+					<p class="mx-2">{{ y.address }}</p>
+				</span>
+				<span class="d-flex flex-column">
+					<strong>Amenities:</strong>
+					<span class="px-3">
+						{% if y.has_wifi %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has WiFi">
+							{% bs_icon 'wifi' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if y.has_outlets %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Outlets">
+							{% bs_icon 'outlet' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if y.has_printers %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Printers">
+							{% bs_icon 'printer' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if y.has_whiteboards %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Has Whiteboards">
+							{% bs_icon 'easel' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if y.is_quiet %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Quiet Study Space">
+							{% bs_icon 'bell-slash' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if y.is_outside %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Outdoor Study Space">
+							{% bs_icon 'sun' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %} {% if y.has_food %}
+						<span data-bs-toggle="tooltip" data-bs-placement="top" title="Food Nearby">
+							{% bs_icon 'cup' size='1.75em' extra_classes='feature-icon' %}
+						</span>
+						{% endif %}
+					</span>
+				</span>
+				<span class="d-flex justify-content-end">
+					<a href="{% url 'study_spaces:edit' y.id %}" class="btn secondary mx-1">Edit</a>
+					<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ y.id }}">Delete</button>
+
+					<div class="modal fade" id="deleteModal{{ y.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body">
+									<p>Are you sure you want to delete the study space "{{ y.name }}"?</p>
+								</div>
+								<form method="post" action="{% url 'study_spaces:delete' y.id %}">
+									{% csrf_token %}
+									<input type="hidden" name="id" value="{{ y.id }}" />
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<input type="submit" value="Delete" class="btn btn-danger" />
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</span>
+			</div>
+			{% endfor %}
+		</div>
+	</body>
+</html>
